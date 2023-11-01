@@ -16,7 +16,7 @@ import (
 	"sync/atomic"
 	"time"
 	"unsafe"
-	
+
 	"github.com/sujit-baniya/log/fqdn"
 )
 
@@ -79,28 +79,25 @@ type ObjectMarshaler interface {
 // A Logger represents an active logging object that generates lines of JSON output to an io.Writer.
 type Logger struct {
 	// Level defines log levels.
-	Level Level
-	
-	LogNode bool
-	
+	Level         Level
+	LogNode       bool
 	EnableTracing bool
-	
-	TraceIDField string
-	
+	TraceIDField  string
+
 	// Caller determines if adds the file:line of the "caller" key.
 	// If Caller is negative, adds the full /path/to/file:line of the "caller" key.
 	Caller int
-	
+
 	// TimeField defines the time filed name in output.  It uses "time" in if empty.
 	TimeField string
-	
+
 	// TimeFormat specifies the time format in output. It uses time.RFC3339 with milliseconds if empty.
 	// If set with `TimeFormatUnix`, `TimeFormatUnixMs`, times are formated as UNIX timestamp.
 	TimeFormat string
-	
+
 	// Context specifies an optional context of logger.
 	Context Context
-	
+
 	// Writer specifies the writer of output. It uses a wrapped os.Stderr Writer in if empty.
 	Writer Writer
 }
@@ -727,7 +724,7 @@ func (e *Entry) Times(key string, a []time.Time) *Entry {
 		e.buf = append(e.buf, '"')
 	}
 	e.buf = append(e.buf, ']')
-	
+
 	return e
 }
 
@@ -759,7 +756,7 @@ func (e *Entry) TimesFormat(key string, timefmt string, a []time.Time) *Entry {
 		}
 	}
 	e.buf = append(e.buf, ']')
-	
+
 	return e
 }
 
@@ -907,14 +904,14 @@ func (e *Entry) AnErr(key string, err error) *Entry {
 	if e == nil {
 		return nil
 	}
-	
+
 	if err == nil {
 		e.buf = append(e.buf, ',', '"')
 		e.buf = append(e.buf, key...)
 		e.buf = append(e.buf, "\":null"...)
 		return e
 	}
-	
+
 	e.buf = append(e.buf, ',', '"')
 	e.buf = append(e.buf, key...)
 	e.buf = append(e.buf, '"', ':')
@@ -933,7 +930,7 @@ func (e *Entry) Errs(key string, errs []error) *Entry {
 	if e == nil {
 		return nil
 	}
-	
+
 	e.buf = append(e.buf, ',', '"')
 	e.buf = append(e.buf, key...)
 	e.buf = append(e.buf, '"', ':', '[')
@@ -1456,7 +1453,7 @@ func (e *Entry) Xid(key string, id int64) *Entry {
 	e.buf = append(e.buf, '"', ':', '"')
 	e.buf = append(e.buf, (ID(id)).String()...)
 	e.buf = append(e.buf, '"')
-	
+
 	return e
 }
 
@@ -1724,7 +1721,7 @@ func (e *Entry) caller(n int, rpc []uintptr, fullpath bool) {
 			file = file[i+1:]
 		}
 	}
-	
+
 	e.buf = append(e.buf, ",\"caller\":\""...)
 	e.buf = append(e.buf, file...)
 	e.buf = append(e.buf, ':')
@@ -1878,11 +1875,11 @@ func (e *Entry) Interface(key string, i interface{}) *Entry {
 	if e == nil {
 		return nil
 	}
-	
+
 	if o, ok := i.(ObjectMarshaler); ok {
 		return e.Object(key, o)
 	}
-	
+
 	e.buf = append(e.buf, ',', '"')
 	e.buf = append(e.buf, key...)
 	e.buf = append(e.buf, '"', ':', '"')
@@ -1902,7 +1899,7 @@ func (e *Entry) Interface(key string, i interface{}) *Entry {
 	if cap(b.B) <= bbcap {
 		bbpool.Put(b)
 	}
-	
+
 	return e
 }
 
@@ -1911,7 +1908,7 @@ func (e *Entry) Object(key string, obj ObjectMarshaler) *Entry {
 	if e == nil {
 		return nil
 	}
-	
+
 	e.buf = append(e.buf, ',', '"')
 	e.buf = append(e.buf, key...)
 	e.buf = append(e.buf, '"', ':')
@@ -1919,7 +1916,7 @@ func (e *Entry) Object(key string, obj ObjectMarshaler) *Entry {
 		e.buf = append(e.buf, "null"...)
 		return e
 	}
-	
+
 	n := len(e.buf)
 	obj.MarshalObject(e)
 	if n < len(e.buf) {
@@ -1928,7 +1925,7 @@ func (e *Entry) Object(key string, obj ObjectMarshaler) *Entry {
 	} else {
 		e.buf = append(e.buf, "null"...)
 	}
-	
+
 	return e
 }
 
@@ -1945,7 +1942,7 @@ func (e *Entry) EmbedObject(obj ObjectMarshaler) *Entry {
 	if e == nil {
 		return nil
 	}
-	
+
 	if obj != nil && (*[2]uintptr)(unsafe.Pointer(&obj))[1] != 0 {
 		obj.MarshalObject(e)
 	}
@@ -1968,7 +1965,7 @@ func (e *Entry) Map(data any) *Entry {
 					e.Any(key, value)
 				}
 			}
-			
+
 		}
 	}
 	return e
